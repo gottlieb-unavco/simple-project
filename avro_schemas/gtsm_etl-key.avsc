@@ -1,0 +1,12 @@
+{
+  "type": "record",
+  "name": "gtsm_etl",
+  "namespace": "gtsm_etl",
+  "fields": [
+    {
+      "name": "site",
+      "type": "string",
+      "doc": "Four Character ID of Site"
+    }
+  ]
+}

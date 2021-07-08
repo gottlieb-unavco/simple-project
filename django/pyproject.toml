@@ -1,0 +1,17 @@
+[tool.flakehell]
+max_line_length = 100
+
+[tool.flakehell.plugins]
+pyflakes = ["+*"]
+# Various exceptions for styles
+pycodestyle = [
+    "+*",
+    "-E501",
+    "-H301",
+    "-H306",
+    "-H404",
+    "-H405",
+    "-H503",
+    "-W503",
+    "-E203",
+]
