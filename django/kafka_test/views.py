@@ -31,6 +31,7 @@ class IndexView(FormView):
                 "Added to queue: '%s'" % value,
             )
         except Exception as e:
+            LOGGER.error(e, exc_info=True)
             messages.add_message(
                 self.request,
                 messages.ERROR,

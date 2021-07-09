@@ -10,11 +10,11 @@ def produce_example_message(value):
     """
     Produce one message
     """
-    topic = 'kafka_test'
+    topic = 'example'
     producer = kafka.kafka_producer(topic)
 
     key = {
-        'key': uuid.uuid4(),
+        'key': str(uuid.uuid4()),
     }
     message = {
         'timestamp': datetime.datetime.utcnow().isoformat(),
