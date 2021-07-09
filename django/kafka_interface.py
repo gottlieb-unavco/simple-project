@@ -10,10 +10,10 @@ import avro.schema
 
 LOGGER = logging.getLogger(__name__)
 
-# Hardcoded for now, set as ENV variables in deployment yaml
-BOOTSTRAP_SERVERS = "broker:29092"
-SCHEMA_REGISTRY_URL = "http://schema-registry:8081"
-AVRO_SCHEMAS_ROOT = "/avro_schemas"
+# Environment variables
+BOOTSTRAP_SERVERS = os.environ.get("BOOTSTRAP_SERVERS", "broker:29092")
+SCHEMA_REGISTRY_URL = os.environ.get("SCHEMA_REGISTRY_URL", "http://schema-registry:8081")
+AVRO_SCHEMAS_ROOT = os.environ.get("AVRO_SCHEMAS_ROOT", "/avro_schemas")
 
 
 class kafka_producer(object):
