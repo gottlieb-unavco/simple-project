@@ -3,7 +3,7 @@ import uuid
 import datetime
 import logging
 
-LOGGER = logging.getLogger("producer")
+LOGGER = logging.getLogger(__name__)
 
 
 def produce_example_message(value):

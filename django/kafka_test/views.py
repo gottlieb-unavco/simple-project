@@ -3,16 +3,17 @@ from django import forms
 from django.contrib import messages
 from django.urls import reverse_lazy
 from kafka_test.producer import produce_example_message
+from kafka_test.models import ExampleValue
+import uuid
 import logging
 
 LOGGER = logging.getLogger(__name__)
 
 
-class TestForm(forms.Form):
-    value = forms.CharField(
-        max_length=32,
-        help_text="Enter any message value",
-    )
+class TestForm(forms.ModelForm):
+    class Meta:
+        model = ExampleValue
+        fields = ['value']
 
 
 class IndexView(FormView):
@@ -21,9 +22,8 @@ class IndexView(FormView):
     success_url = reverse_lazy('kafka-test')
 
     def form_valid(self, form):
-
-        value = form.cleaned_data.get('value')
         try:
+            value = form.cleaned_data.get('value')
             produce_example_message(value)
             messages.add_message(
                 self.request,
