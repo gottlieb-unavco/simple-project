@@ -1,12 +1,12 @@
 {
-  "type": "record",
-  "name": "example",
-  "namespace": "example",
-  "fields": [
-    {
-      "name": "key",
-      "type": "string",
-      "doc": "Identifying key"
-    }
-  ]
+    "type": "record",
+    "name": "example",
+    "namespace": "example",
+    "fields": [
+        {
+            "name": "key",
+            "type": "string",
+            "doc": "Identifying key"
+        }
+    ]
 }

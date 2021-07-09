@@ -2,6 +2,14 @@
 
 A base project for development, containing a docker-compose recipe and various components.
 
+## Installation
+
+From the base directory, run
+
+    docker compose up -d
+
+Check that the web front-end is running at http://localhost:8888/
+
 ## Components
 
 ### Kafka stack
