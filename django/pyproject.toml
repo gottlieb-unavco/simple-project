@@ -3,15 +3,16 @@ max_line_length = 100
 
 [tool.flakehell.plugins]
 pyflakes = ["+*"]
-# Various exceptions for styles
+# Loosen some rules
 pycodestyle = [
     "+*",
-    "-E501",
-    "-H301",
-    "-H306",
-    "-H404",
-    "-H405",
-    "-H503",
-    "-W503",
-    "-E203",
+    # Flake8 rules
+    "-E401",  # Multiple imports on one line
+    "-W503",  # Line break occurred before a binary operator
+    # Hacking (OpenStack StyleGuide) rules
+    "-H301",  # Do not import more than one module per line
+    "-H306",  # Alphabetically order your imports by the full module path
+    "-H404",  # Multi line docstrings should start without a leading new line
+    "-H405",  # Multi line docstrings should start with a one line summary followed by an empty line
+    "-H503",  # ???
 ]
