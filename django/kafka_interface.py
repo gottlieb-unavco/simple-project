@@ -1,8 +1,7 @@
 import sys, os, logging
 import requests
-
+import json
 from confluent_kafka import SerializingProducer, DeserializingConsumer
-from confluent_kafka.cimpl import KafkaException
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroSerializer, AvroDeserializer
 from confluent_kafka.error import ValueDeserializationError, KeyDeserializationError
@@ -28,7 +27,6 @@ class kafka_producer(object):
 
         # load value schema from file if specified, use default file name if not specified
         # last check registry for latest version
-        LOGGER.info("Looking for local key schema file")
         if key_schema_file:
             self.key_schema_file = os.path.join(
                 AVRO_SCHEMAS_ROOT,
@@ -40,6 +38,7 @@ class kafka_producer(object):
                 "%s-key.avsc" % topic,
             )
 
+        LOGGER.info("Reading key schema file: %s", self.key_schema_file)
         if os.path.exists(self.key_schema_file):
             with open(self.key_schema_file, "rb") as f:
                 self.key_schema_str = str(avro.schema.parse(f.read()))
@@ -49,13 +48,14 @@ class kafka_producer(object):
                 SCHEMA_REGISTRY_URL + '/subjects/' + self.topic + '-key/versions/latest'
             )
             r = requests.get(key_schema_url)
-            self.key_schema_str = r.json()['schema']
+            self.key_schema_str = json.dumps(r.json()['schema'])
 
-        self.key_avro_serializer = AvroSerializer(self.key_schema_str, schema_registry_client)
+        self.key_avro_serializer = AvroSerializer(
+            schema_registry_client, self.key_schema_str
+        )
 
         # load value schema from file if specified, use default file name if not specified
         # last check registry for latest version
-        LOGGER.info("Looking for local value schema file")
         if value_schema_file:
             self.value_schema_file = os.path.join(
                 AVRO_SCHEMAS_ROOT,
@@ -64,22 +64,24 @@ class kafka_producer(object):
         else:
             self.value_schema_file = os.path.join(
                 AVRO_SCHEMAS_ROOT,
-                "%s-key.avsc" % topic,
+                "%s-value.avsc" % topic,
             )
 
+        LOGGER.info("Reading value schema file: %s", self.value_schema_file)
         if os.path.exists(self.value_schema_file):
             with open(self.value_schema_file, "rb") as f:
                 self.value_schema_str = str(avro.schema.parse(f.read()))
-
         else:
             LOGGER.info("No local value schema file, checking registry")
             value_schema_url = (
                 SCHEMA_REGISTRY_URL + '/subjects/' + self.topic + '-value/versions/latest'
             )
             r = requests.get(value_schema_url)
-            self.value_schema_str = r.json()['schema']
+            self.value_schema_str = json.dumps(r.json()['schema'])
 
-        self.value_avro_serializer = AvroSerializer(self.value_schema_str, schema_registry_client)
+        self.value_avro_serializer = AvroSerializer(
+            schema_registry_client, self.value_schema_str
+        )
 
         producer_config = {
             'bootstrap.servers': BOOTSTRAP_SERVERS,
@@ -90,7 +92,7 @@ class kafka_producer(object):
         }
 
         self.producer = SerializingProducer(producer_config)
-        
+
     def produce(self, key, message):
         self.producer.produce(self.topic, key, message)
 
@@ -102,7 +104,7 @@ class kafka_producer(object):
         self.producer.flush()
 
 
-class kafka_consumer:
+class kafka_consumer(object):
     def __init__(self, topic, value_schema_file=False, key_schema_file=False, consumer_group=False):
 
         self.topic = topic
@@ -112,12 +114,18 @@ class kafka_consumer:
 
         # load key schema from file if specified, use default file name if not specified
         # last check registry for latest version
-        LOGGER.info("Looking for local key schema file")
         if key_schema_file:
-            self.key_schema_file = "avro/" + key_schema_file
+            self.key_schema_file = os.path.join(
+                AVRO_SCHEMAS_ROOT,
+                key_schema_file,
+            )
         else:
-            self.key_schema_file = "avro/" + topic + "-key.avsc"
+            self.key_schema_file = os.path.join(
+                AVRO_SCHEMAS_ROOT,
+                "%s-key.avsc" % topic,
+            )
 
+        LOGGER.info("Reading key schema file: %s", self.key_schema_file)
         if os.path.exists(self.key_schema_file):
             with open(self.key_schema_file, "rb") as f:
                 self.key_schema_str = str(avro.schema.parse(f.read()))
@@ -129,20 +137,27 @@ class kafka_consumer:
             r = requests.get(key_schema_url)
             self.key_schema_str = r.json()['schema']
 
-        self.key_avro_deserializer = AvroDeserializer(self.key_schema_str, schema_registry_client)
+        self.key_avro_deserializer = AvroDeserializer(
+            schema_registry_client, self.key_schema_str
+        )
 
         # load value schema from file if specified, use default file name if not specified
         # last check registry for latest version
-        LOGGER.info("Looking for local value schema file")
         if value_schema_file:
-            self.value_schema_file = "avro/" + value_schema_file
+            self.value_schema_file = os.path.join(
+                AVRO_SCHEMAS_ROOT,
+                value_schema_file,
+            )
         else:
-            self.value_schema_file = "avro/" + topic + "-value.avsc"
+            self.value_schema_file = os.path.join(
+                AVRO_SCHEMAS_ROOT,
+                "%s-value.avsc" % topic,
+            )
 
+        LOGGER.info("Reading value schema file: %s", self.value_schema_file)
         if os.path.exists(self.value_schema_file):
             with open(self.value_schema_file, "rb") as f:
                 self.value_schema_str = str(avro.schema.parse(f.read()))
-
         else:
             LOGGER.info("No local value schema file, checking registry")
             value_schema_url = (
@@ -152,7 +167,7 @@ class kafka_consumer:
             self.value_schema_str = r.json()['schema']
 
         self.value_avro_deserializer = AvroDeserializer(
-            self.value_schema_str, schema_registry_client
+            schema_registry_client, self.value_schema_str
         )
 
         # use consumer group name if given, otherwise default to using topic name
