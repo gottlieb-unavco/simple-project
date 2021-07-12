@@ -37,7 +37,7 @@ class ExampleConsumer(JsonWebsocketConsumer):
                 response['result'] = self.action_send(request)
             elif action == 'list':
                 # Updates since
-                response['items'] = self.action_list_since(request)
+                response['items'] = self.action_list(request)
             else:
                 raise NotImplementedError("No action %s" % action)
             response['status'] = 'ok'
