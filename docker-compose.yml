@@ -54,10 +54,11 @@ services:
     image: nginx
     volumes:
       - ./nginx:/etc/nginx
-      - django-static:/django-static:ro
+      - ./django-static:/etc/nginx/html/static
     ports:
       - 8888:80
       - 8443:443
+      - 8080:8080
 
   postgres:
     image: postgres

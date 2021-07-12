@@ -1,0 +1,16 @@
+body {
+    padding: 1em;
+}
+.latest {
+    list-style: none;
+    padding: 0;
+}
+.latest .value {
+    font-weight: bold;
+}
+.latest .created_date, .latest .timestamp {
+    color: #999;
+}
+.latest .delay {
+    font-size: 90%;
+}
