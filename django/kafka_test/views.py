@@ -2,7 +2,7 @@ from django.views.generic.edit import FormView
 from django import forms
 from django.contrib import messages
 from django.urls import reverse_lazy
-from kafka_test.producer import produce_example_message
+from kafka_test.kafka.producer import produce_example_message
 from kafka_test.models import ExampleValue
 import uuid
 import logging

@@ -206,4 +206,5 @@ class kafka_consumer(object):
                 continue
             except KeyboardInterrupt:
                 LOGGER.error('Stopping via keyboardInterrupt')
-                sys.exit()
+                # sys.exit()
+                raise
