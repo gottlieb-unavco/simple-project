@@ -1,6 +1,9 @@
 avro
+channels
 confluent-kafka[avro]
 Django>=3,<4
-fastavro
+gevent
+gunicorn
 psycopg2-binary
 requests
+uvicorn[standard]
