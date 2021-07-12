@@ -1,4 +1,5 @@
-# base-project
+# simple-project
 
-A base project for development, containing a docker-compose recipe and various components.
+A simple development-oriented project
 
+See [docs](docs/) for general documentation.
