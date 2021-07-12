@@ -1,2 +1,2 @@
-# base-project
-A base project for development
+# simple-project
+A simple development-oriented project
