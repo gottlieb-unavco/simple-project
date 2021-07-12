@@ -12,9 +12,23 @@
     </ul>
     {% endif %}
 
-    <form method="post">{% csrf_token %}
+    <form class="message-form" method="post">{% csrf_token %}
       {{ form.as_p }}
       <button type="submit">Send a test message</button>
     </form>
+
+    {% if recent %}
+    <h3>Latest archived</h3>
+    <ul class="latest">
+      {% for item in recent %}
+        <li>
+          <span class="value">{{ item.value }}</span>
+          <span class="created_date">{{ item.created_date }}</span>
+          <span class="timestamp">{{ item.timestamp }}</span>
+          <span class="delay">({{ item.delay }})</span>
+        </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
   </body>
 </html>
