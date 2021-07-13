@@ -2,12 +2,18 @@
 
 This is a Django server for doing web application work.
 
+## Overview
+
 - __Docker__ : recipe for building the django image
 - __kafka_test__ : example application
 - __www__ : project definition
   - __www/settings.py__ : server settings
   - __www/urls.py__ : top-level routing table
 - __requirements.txt__ : python environment definition
+
+This runs on a local sqlite3 database stored in the project root.
+
+Static files are expected to be in `/django-static`.
 
 ## Running the local server
 
