@@ -1,5 +1,5 @@
 {% load static %}
-{% load crispy %}
+{% load crispy_forms_tags %}
 <!doctype html>
 <html>
   <head>
@@ -10,8 +10,8 @@
 
     <div class="d-flex">
       <div class="">
-        <form class="message-form" method="post">{% csrf_token %}
-          {{ form.as_div }}
+        <form class="form-inline message-form" method="post">{% csrf_token %}
+          {% crispy form %}
           <button type="submit">Send a test message</button>
         </form>
       </div>
