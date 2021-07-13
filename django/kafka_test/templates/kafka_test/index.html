@@ -1,17 +1,23 @@
 {% load static %}
-{% load crispy %}
 <!doctype html>
 <html>
   <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="{% static 'kafka_test/kafka-test.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.js" integrity="sha256-HwWONEZrpuoh951cQD1ov2HUK5zA5DwJ1DNUXaM6FsY=" crossorigin="anonymous"></script>
+    <script src="{% static 'kafka_test/kafka-socket.js' %}"></script>
+    <script>
+$(function() {
+  attachSocket($('.message-form'), $('.latest'));
+});
+    </script>
   </head>
   <body>
 
-    <div class="d-flex">
-      <div class="">
+    <div class="clearfix">
+      <div class="pull-left">
         <form class="message-form" method="post">{% csrf_token %}
-          {{ form.as_div }}
+          {{ form.as_p }}
           <button type="submit">Send a test message</button>
         </form>
       </div>
