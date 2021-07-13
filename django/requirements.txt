@@ -1,0 +1,10 @@
+avro
+channels
+confluent-kafka[avro]
+Django>=3,<4
+django-crispy-forms
+gevent
+gunicorn
+psycopg2-binary
+requests
+uvicorn[standard]
