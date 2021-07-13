@@ -12,4 +12,8 @@ body {
 
 .resp-status {
     position: absolute;
+    padding: .5rem 1rem;
+    background: #ffc;
+    max-height: 100px;
+    overflow-y: auto;
 }
