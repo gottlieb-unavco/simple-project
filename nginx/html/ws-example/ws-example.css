@@ -1,0 +1,15 @@
+body {
+    padding: 1em;
+}
+
+.latest .value {
+    font-weight: bold;
+    padding-right: 1em;
+}
+.latest .delay {
+    font-size: 90%;
+}
+
+.resp-status {
+    position: absolute;
+}

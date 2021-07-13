@@ -14,8 +14,8 @@ $(function() {
   </head>
   <body>
 
-    <div class="clearfix">
-      <div class="pull-left">
+    <div class="d-flex">
+      <div class="">
         <form class="message-form" method="post">{% csrf_token %}
           {{ form.as_p }}
           <button type="submit">Send a test message</button>

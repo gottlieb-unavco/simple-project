@@ -1,11 +1,8 @@
-function makeButton() {
-    return $('<button type="button" class="btn btn-light"><i></i></button>');
-}
 
 function getSocket(onmessage) {  
   var state = 'init';
   var localhost = "" + location.host;
-  var wsURL = 'ws://' + localhost + '/ws/example/';
+  var wsURL = 'ws://' + localhost + '/example/ws/';
   var socket = null;
 
   /**
@@ -50,30 +47,54 @@ function getSocket(onmessage) {
   };
 }
 
-function createItem(item) {
-  return $('<li>').append(
-    $('<span class="value">').text('' + item.value),
-    $('<span class="created_date">').text('' + item.created_date),
-    $('<span class="datetime">').text('' + item.datetime),
-  );
+function timeDiff(t1, t2) {
+  return (new Date(t2) - new Date(t1)) / 1000;
 }
 
+function createItem(item) {
+  var delay = timeDiff(item.timestamp, item.created_date);
+  var $delay = $('<span class="delay">').text("" + delay + "s");
+  $delay.prop('title', (
+    "transmitted: " + item.timestamp + " " +
+    "received: " + item.created_date
+  ));
+  return $('<li>').append(
+    $('<span class="value">').text('' + item.value),
+    $delay,
+  );
+}
 /**
  * Attach the socket API on top of the page elements
  */
-function attachSocket($form, $latest) {
-  var $status = $('<div class="ws-status" />');
+ function attachSocket($form, $status, $latest) {
+  var $connStatus = $('<div class="conn-status" />');
+  $status.append($connStatus);
+  var $responseStatus = $('<div class="resp-status" />');
+  $status.append($responseStatus);
+
+  function addStatusLine(desc, text) {
+    $responseStatus.prepend(
+      $('<div class="status-line">').append(
+        $('<span class="desc">').text(desc),
+        text,
+      )
+    );
+  }
+
   function onmessage(message) {
     var response = JSON.parse(message.data);
     console.log(response);
-    $test.prop('disabled', false);
+    addStatusLine('received', response.status);
     if (response.status == 'ok') {
+      // Text result
       if (response.result) {
-        $status.text(response.result);
-        $refresh.click();
+        addStatusLine('result', response.result);
+        // Refresh the list
+        setTimeout(() => $refresh.click(), 500);
       }
+      // If row items returned, show them in the list
       if (response.items) {
-        $latest.prepend(
+        $latest.empty().append(
           response.items.map(createItem)
         );
       }
@@ -83,19 +104,20 @@ function attachSocket($form, $latest) {
   var messageIdx = 1;
   var $test = $('<button type="button">').text('Send a test message');
   $test.click(function() {
-    $test.prop('disabled', true);
+    var value = 'Message ' + messageIdx++;
     ws.send({
       action: 'send',
-      value: 'Message ' + messageIdx++,
+      value: value,
     });
+    addStatusLine('sent', value);
   });
   var $refresh = $('<button type="button">').text('Load recent');
   $refresh.click(function() {
     ws.send({
       action: 'list',
     });
+    addStatusLine('list', '');
   });
 
   $form.after($test, $refresh, $status);
-  $form.hide();
 }
