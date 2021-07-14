@@ -91,6 +91,8 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    ports:
+      - 8432:5432
 
   # Redis key/value store
   redis:
@@ -100,11 +102,11 @@ services:
 
    # Django site that does data collection and distribution
   django_web:
-    build: django
+    build: es-django
     command: gunicorn -c ./gunicorn.conf.py
     volumes:
-      - django:/django
       - ./avro_schemas:/avro_schemas:ro
+      - django:/django
       - django-static:/django-static
     environment:
       - POSTGRES_DB=postgres
@@ -119,14 +121,14 @@ services:
 
   # Django data archiver
   django_archiver:
-    build: django
+    build: es-django
     command: python manage.py run_kafka_consumer
     depends_on:
       - broker
       - schema-registry
     volumes:
-      - django:/django
       - ./avro_schemas:/avro_schemas:ro
+      - django:/django
       - django-static:/django-static
     environment:
       - POSTGRES_DB=postgres

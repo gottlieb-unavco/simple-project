@@ -4,4 +4,5 @@ WORKDIR /django
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . ./
-RUN python manage.py migrate
+COPY docker-entrypoint.sh /
+ENTRYPOINT ["/docker-entrypoint.sh"]
