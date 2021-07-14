@@ -8,22 +8,28 @@
   </head>
   <body>
 
+    <h1>Django Example</h1>
+
     <div class="d-flex">
-      <div class="">
-        <form class="form-inline message-form" method="post">{% csrf_token %}
-          {{ form.as_p }}
-          <button type="submit">Send a test message</button>
-        </form>
-      </div>
+      <form class="message-form" method="post">{% csrf_token %}
+        <div class="row g-2">
+          <div class="col">
+            {{ form.value }}
+          </div>
+          <div class="col">
+            <button type="submit">Send a test message</button>
+          </div>
+        </div>
+      </form>
 
       {% if messages %}
-      <ul class="messages">
+      <div class="messages">
           {% for message in messages %}
-          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+          <div{% if message.tags %} class="{{ message.tags }}"{% endif %}>
               {{ message }}
-          </li>
+          </div>
           {% endfor %}
-      </ul>
+      </div>
       {% endif %}
     </div>
 
