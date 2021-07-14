@@ -48,18 +48,19 @@ function getSocket(onmessage) {
 }
 
 function timeDiff(t1, t2) {
-  return (new Date(t2) - new Date(t1)) / 1000;
+  return (new Date(t2) - new Date(t1));
 }
 
 function createItem(item) {
   var delay = timeDiff(item.timestamp, item.created_date);
-  var $delay = $('<span class="delay">').text("" + delay + "s");
+  var $delay = $('<span class="delay">').text("" + delay + "ms");
   $delay.prop('title', (
     "transmitted: " + item.timestamp + " " +
     "received: " + item.created_date
   ));
   return $('<li>').append(
     $('<span class="value">').text('' + item.value),
+    $('<span class="timestamp">').text('' + item.timestamp),
     $delay,
   );
 }
@@ -72,23 +73,25 @@ function createItem(item) {
   var $responseStatus = $('<div class="resp-status" />');
   $status.append($responseStatus);
 
-  function addStatusLine(desc, text) {
-    $responseStatus.prepend(
-      $('<div class="status-line">').append(
-        $('<span class="desc">').text(desc),
-        text,
-      )
+  function addStatusLine(desc, data) {
+    var $statusLine = (
+      $('<div class="status-line">')
+      .addClass(desc)
+      .text(JSON.stringify(data))
     );
+    $('.status-line', $responseStatus).slice(0, -9).remove();
+    $responseStatus.append($statusLine);
+    // Scroll to the new line
+    $statusLine.get(0).scrollIntoView(false);
   }
 
   function onmessage(message) {
     var response = JSON.parse(message.data);
     console.log(response);
-    addStatusLine('received', response.status);
+    addStatusLine('in', response);
     if (response.status == 'ok') {
       // Text result
       if (response.result) {
-        addStatusLine('result', response.result);
         // Refresh the list
         setTimeout(() => $refresh.click(), 500);
       }
@@ -102,21 +105,25 @@ function createItem(item) {
   }
   var ws = getSocket(onmessage);
   var messageIdx = 1;
+
+  function sendMessage(message) {
+    ws.send(message);
+    addStatusLine('out', message);
+  }
+
   var $test = $('<button type="button">').text('Send a test message');
   $test.click(function() {
     var value = 'Message ' + messageIdx++;
-    ws.send({
+    sendMessage({
       action: 'send',
       value: value,
     });
-    addStatusLine('sent', value);
   });
-  var $refresh = $('<button type="button">').text('Load recent');
+  var $refresh = $('<button type="button">').text('Update latest');
   $refresh.click(function() {
-    ws.send({
+    sendMessage({
       action: 'list',
     });
-    addStatusLine('list', '');
   });
 
   $form.after($test, $refresh, $status);
