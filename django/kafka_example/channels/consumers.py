@@ -1,7 +1,7 @@
 from channels.generic.websocket import JsonWebsocketConsumer
-from kafka_test.models import ExampleValue
+from kafka_example.models import ExampleValue
 from logging import getLogger
-from kafka_test.kafka.producer import produce_example_message
+from kafka_example.kafka.producer import produce_example_message
 from es_lib.utils import parse_iso8601, safe_json, parse_json
 
 LOGGER = getLogger(__name__)

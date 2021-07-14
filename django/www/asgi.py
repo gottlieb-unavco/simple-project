@@ -16,7 +16,7 @@ from django.core.asgi import get_asgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'www.settings')
 django_asgi_app = get_asgi_application()
 
-import kafka_test.channels.routing  # noqa
+import kafka_example.channels.routing  # noqa
 
 
 def create_app():
@@ -24,7 +24,7 @@ def create_app():
         "http": AsgiHandler(),
         "websocket": AuthMiddlewareStack(
             URLRouter(
-                kafka_test.channels.routing.websocket_urlpatterns
+                kafka_example.channels.routing.websocket_urlpatterns
             )
         ),
     })

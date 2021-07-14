@@ -2,8 +2,8 @@ from django.views.generic.edit import FormView
 from django import forms
 from django.contrib import messages
 from django.urls import reverse_lazy
-from kafka_test.kafka.producer import produce_example_message
-from kafka_test.models import ExampleValue
+from kafka_example.kafka.producer import produce_example_message
+from kafka_example.models import ExampleValue
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -22,10 +22,10 @@ class IndexView(FormView):
     """
     It's a form with one field, the value to send
     """
-    template_name = 'kafka_test/index.html'
+    template_name = 'kafka_example/index.html'
     form_class = TestForm
     # When done, redirect back to this page
-    success_url = reverse_lazy('kafka-test')
+    success_url = reverse_lazy('kafka-example')
 
     def form_valid(self, form):
         """

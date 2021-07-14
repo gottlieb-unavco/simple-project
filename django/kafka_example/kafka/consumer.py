@@ -1,6 +1,6 @@
 import kafka_interface as kafka
 import logging
-from kafka_test.models import ExampleValue
+from kafka_example.models import ExampleValue
 
 LOGGER = logging.getLogger(__name__)
 

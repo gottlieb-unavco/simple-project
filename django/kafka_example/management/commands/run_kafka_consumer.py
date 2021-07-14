@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from kafka_test.kafka.consumer import ExampleConsumer
+from kafka_example.kafka.consumer import ExampleConsumer
 from logging import getLogger
 
 LOGGER = getLogger(__name__)

@@ -18,5 +18,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('example/', include('kafka_test.urls')),
+    path('example/', include('kafka_example.urls')),
 ]

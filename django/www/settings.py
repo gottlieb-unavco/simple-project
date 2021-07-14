@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'crispy_forms',
-    'kafka_test',
+    'kafka_example',
 ]
 
 MIDDLEWARE = [

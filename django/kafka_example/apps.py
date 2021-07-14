@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class KafkaTestConfig(AppConfig):
+class KafkaExampleConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'kafka_test'
+    name = 'kafka_example'
