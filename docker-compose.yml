@@ -101,12 +101,16 @@ services:
    # Django site that does data collection and distribution
   django_web:
     build: django
-    command: bash -c "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn -c /django/gunicorn.conf.py"
+    command: gunicorn -c ./gunicorn.conf.py
     volumes:
-      - ./django:/django
+      - django:/django
       - ./avro_schemas:/avro_schemas:ro
       - django-static:/django-static
     environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
       - BOOTSTRAP_SERVERS=broker:29092
       - SCHEMA_REGISTRY_URL=http://schema-registry:8081
       - AVRO_SCHEMAS_ROOT=/avro_schemas
@@ -121,10 +125,14 @@ services:
       - broker
       - schema-registry
     volumes:
-      - ./django:/django
+      - django:/django
       - ./avro_schemas:/avro_schemas:ro
       - django-static:/django-static
     environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
       - BOOTSTRAP_SERVERS=broker:29092
       - SCHEMA_REGISTRY_URL=http://schema-registry:8081
       - AVRO_SCHEMAS_ROOT=/avro_schemas
@@ -134,3 +142,4 @@ volumes:
   kafka-data:
   postgres-data:
   django-static:
+  django:
