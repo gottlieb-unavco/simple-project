@@ -1,5 +1,5 @@
 ---
-version: '2'
+version: '3'
 services:
   # Apache zookeeper provides services for Kafka
   zookeeper:
@@ -75,7 +75,7 @@ services:
     image: nginx
     volumes:
       - ./nginx:/etc/nginx
-      - ./django-static:/etc/nginx/html/static
+      - django-static:/etc/nginx/html/static
     ports:
       # The main web interface
       - 8080:80
@@ -98,7 +98,6 @@ services:
     ports:
       - 6379:6379
 
-
    # Django site that does data collection and distribution
   django_web:
     build: django
@@ -106,7 +105,7 @@ services:
     volumes:
       - ./django:/django
       - ./avro_schemas:/avro_schemas:ro
-      - ./django-static:/django-static
+      - django-static:/django-static
     environment:
       - BOOTSTRAP_SERVERS=broker:29092
       - SCHEMA_REGISTRY_URL=http://schema-registry:8081
@@ -124,7 +123,7 @@ services:
     volumes:
       - ./django:/django
       - ./avro_schemas:/avro_schemas:ro
-      - ./django-static:/django-static
+      - django-static:/django-static
     environment:
       - BOOTSTRAP_SERVERS=broker:29092
       - SCHEMA_REGISTRY_URL=http://schema-registry:8081
@@ -134,3 +133,4 @@ services:
 volumes:
   kafka-data:
   postgres-data:
+  django-static:
