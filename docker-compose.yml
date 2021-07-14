@@ -100,7 +100,7 @@ services:
   # Django web applications
   django:
     build: django
-    command: bash -c "python manage.py migrate && gunicorn -c /django/gunicorn.conf.py"
+    command: bash -c "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn -c /django/gunicorn.conf.py"
     volumes:
       - ./django:/django
       - ./avro_schemas:/avro_schemas:ro
