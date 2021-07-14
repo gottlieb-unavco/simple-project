@@ -2,6 +2,7 @@ body {
     padding: 1em;
 }
 
+/* List of latest messages */
 .latest .value {
     font-weight: bold;
     padding-right: 1rem;
@@ -14,9 +15,9 @@ body {
     font-size: .9rem;
 }
 
+/* Socket status display */
 .status {
-    position: absolute;
-    right: 0;
+    margin-left: 2rem;
     padding: .1rem .3rem;
     background: #ffc;
     width: 30rem;
@@ -31,8 +32,8 @@ body {
 }
 
 .status .socket-status {
-    max-height: 5rem;
-    overflow-y: auto;
+    height: 5rem;
+    overflow: scroll;
 }
 
 .socket-status .status-line {

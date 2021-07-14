@@ -13,14 +13,23 @@ $(function() {
   </head>
   <body>
 
-    <h1>WebSockets Example</h1>
-
     <div class="d-flex">
-      <div class="form">
-      </div>
+      <div>
+        <h1>WebSockets Example</h1>
 
-      <div class="status">
-        <h4>WebSocket traffic</h4>
+        <p>
+          Click the button to submit a message via WebSocket.
+          It will automatically request a list update .5s, usually the message will have been 
+          consumed and saved in the archive by then.
+        </p>
+
+        <div class="form">
+        </div>
+      </div>
+      <div>
+        <div class="status">
+          <h4>WebSocket traffic</h4>
+        </div>
       </div>
     </div>
 
