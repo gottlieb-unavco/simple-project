@@ -2,6 +2,8 @@
 
 This is a Django server for doing web application work.
 
+Test
+
 ## Overview
 
 - __Docker__ : recipe for building the django image
