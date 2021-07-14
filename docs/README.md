@@ -1,10 +1,20 @@
 # About this project
 
-This is intended to be a starting point for work on a container.
+- [About this project](#about-this-project)
+  - [Overview](#overview)
+  - [Installation](#installation)
+  - [How to use](#how-to-use)
+  - [Components](#components)
+    - [Kafka stack](#kafka-stack)
+    - [Web front end](#web-front-end)
+    - [Django server](#django-server)
+    - [Storage layers](#storage-layers)
 
-It contains a Kafka subsystem, nginx front end, and various storage layers.
+## Overview
 
-Add/configure your container in `docker-compose.yml`. You can reference a built image or develop one locally (see [django]`).
+This is intended to be a starting point for work on a container, and a reference environment for development of cross-container features.
+
+It contains a Kafka subsystem, nginx front end, and various storage layers. It also contains a hodgepodge of custom libraries and applications.
 
 ## Installation
 
@@ -12,7 +22,31 @@ From the base directory, run
 
     docker compose up -d
 
-Check that the web front-end is running at http://localhost:8888/
+Check that the web front-end is running at http://localhost:8080/
+
+See [Installation](Installation) for more.
+
+## How to use
+
+_NOTE_ -- this is not really worked-out yet. Ultimately whatever is convenient for developers should be the usage guidelines.
+
+This project is intended to help a developer build a Dockerizable feature -- code and configuration for a Docker image -- which interoperates with the major platform features of the Earthscope architecture.
+
+To develop "inline", create (or link) a subpath in this project containing a `Dockerfile` defining your image, and add it as a service in `docker-compose.yml` using the `build` option:
+
+eg. create:
+
+    simple-project/
+      my_feature/
+        Dockerfile
+
+and add to the `docker-compose.yml` like:
+
+    services:
+        my_feature:
+            build: my_feature
+
+See the [Django](Django) subdirectory for an example.
 
 ## Components
 
