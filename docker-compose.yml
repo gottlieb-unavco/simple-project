@@ -77,9 +77,10 @@ services:
       - ./nginx:/etc/nginx
       - ./django-static:/etc/nginx/html/static
     ports:
-      - 8888:80
+      # The main web interface
+      - 8080:80
+      # HTTPS
       - 8443:443
-      - 8080:8080
 
   # Postgres database
   postgres:
@@ -97,8 +98,9 @@ services:
     ports:
       - 6379:6379
 
-  # Django web applications
-  django:
+
+   # Django site that does data collection and distribution
+  django_web:
     build: django
     command: bash -c "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn -c /django/gunicorn.conf.py"
     volumes:

@@ -27,19 +27,16 @@ function getSocket(onmessage) {
     socket.onmessage = onmessage;
     socket.onerror = function() {
       console.log("Error");
-      socketPromise.reject();
+      if (socketPromise) {
+        socketPromise.reject();
+      }
     }
     socket.onclose = function() {
       console.log("Closing");
-      var wasError = (state == 'error');
-      socketPromise.reject();
-      socketPromise = null;
-      if (!wasError) {
-        var timeout = (retries ^ retryBackoff) * retryBaseTimeout;
-        console.log("Will retry socket in " + timeout + "ms");
-        setTimeout(createSocketPromise, timeout);
-        // Increment retries if we come here again
-        retries++;
+      var wasError = (state == 'error');      
+      if (socketPromise) {
+        socketPromise.reject();
+        socketPromise = null;
       }
     };
     return socketPromise;
@@ -64,8 +61,8 @@ function getSocket(onmessage) {
         }
         return socket;         
       },
-      // We could retry on failure, but the socket onclose does this?
-      // createSocketPromise,
+      // Error = socket is closed, try recreating
+      createSocketPromise,
     )
   }
 
@@ -206,7 +203,7 @@ function makeMessageText() {
       value: makeMessageText(),
     });
   });
-  var $refresh = $('<button type="button">').text('Update latest');
+  var $refresh = $('<button type="button">').text('Refresh list');
   $refresh.click(function() {
     sendMessage({
       action: 'list',
