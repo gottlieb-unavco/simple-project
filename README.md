@@ -10,6 +10,8 @@ From the root of this project run:
 
     docker compose up -d
 
+See [Installation](docs/Installation.md) for more.
+
 ## Base Framework Components
 
 These attempt to provide a "standard" set of services matching the deployment environment. For the most part, all these components and configuration should be kept in sync.

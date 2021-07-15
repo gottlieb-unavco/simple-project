@@ -1,15 +1,5 @@
 # About this project
 
-- [About this project](#about-this-project)
-  - [Overview](#overview)
-  - [Installation](#installation)
-  - [How to use](#how-to-use)
-  - [Components](#components)
-    - [Kafka stack](#kafka-stack)
-    - [Web front end](#web-front-end)
-    - [Django server](#django-server)
-    - [Storage layers](#storage-layers)
-
 ## Overview
 
 This is intended to be a starting point for work on a container, and a reference environment for development of cross-container features.
