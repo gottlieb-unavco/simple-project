@@ -102,7 +102,8 @@ services:
 
    # Django site that does data collection and distribution
   django_web:
-    build: es-django
+    image: ghcr.io/adam-iris/es-django:main
+    # build: es-django
     command: gunicorn -c ./gunicorn.conf.py
     volumes:
       - ./avro_schemas:/avro_schemas:ro
@@ -121,7 +122,8 @@ services:
 
   # Django data archiver
   django_archiver:
-    build: es-django
+    image: ghcr.io/adam-iris/es-django:main
+    # build: es-django
     command: python manage.py run_kafka_consumer
     depends_on:
       - broker
