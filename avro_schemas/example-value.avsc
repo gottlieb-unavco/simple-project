@@ -9,6 +9,11 @@
             "doc":"YYYY-MM-DD HH:MM:SS.fff"
         },
         {
+            "name": "data_id",
+            "type": ["string","null"],
+            "doc": "Data identifier"
+        },
+        {
             "name": "value",
             "type": ["string","null"],
             "doc":"Arbitrary value"
