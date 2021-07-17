@@ -1,7 +1,9 @@
 ---
 version: '3'
 services:
-  # Apache zookeeper provides services for Kafka
+
+  # REQUIRED for kafka
+  # Apache zookeeper does what now?
   zookeeper:
     image: confluentinc/cp-zookeeper:6.1.1
     hostname: zookeeper
@@ -11,6 +13,7 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
+  # REQUIRED for kafka
   # The kafka broker
   broker:
     image: confluentinc/cp-server:6.1.1
@@ -39,10 +42,12 @@ services:
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       CONFLUENT_METRICS_ENABLE: 'true'
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
-    volumes:
-      - kafka-data:/var/lib/kafka/data
+    # If disconnected from a volume, rebuilding will reset
+    # volumes:
+    #   - kafka-data:/var/lib/kafka/data
 
-  # Schema registry
+  # REQUIRED for kafka
+  # Registry for kafka message schemas
   schema-registry:
     image: confluentinc/cp-schema-registry:6.1.1
     hostname: schema-registry
@@ -70,12 +75,15 @@ services:
   #     KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
   #     KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
 
+  # REQUIRED for web
   # Web front-end
   nginx:
     image: nginx
     volumes:
+      # Define a base nginx path in our subdirectory
       - ./nginx:/etc/nginx
-      - django-static:/etc/nginx/html/static
+      # Django static files are in a docker volume
+      - web-static:/etc/nginx/html/static
     ports:
       # The main web interface
       - 8080:80
@@ -100,15 +108,18 @@ services:
     ports:
       - 6379:6379
 
-   # Django site that does data collection and distribution
+  # Example django site
   django_web:
+    # GitHub repository image
     image: ghcr.io/adam-iris/es-django:main
-    # build: es-django
+    # Build from local version of the project
+    build: es-django
     command: gunicorn -c ./gunicorn.conf.py
     volumes:
+      # AVRO schemas
       - ./avro_schemas:/avro_schemas:ro
-      - django:/django
-      - django-static:/django-static
+      # Shared volume for static files
+      - web-static:/django-static
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_HOST=postgres
@@ -122,16 +133,17 @@ services:
 
   # Django data archiver
   django_archiver:
+    # GitHub repository image
     image: ghcr.io/adam-iris/es-django:main
-    # build: es-django
+    # Build from local version of the project
+    build: es-django
     command: python manage.py run_kafka_consumer
     depends_on:
       - broker
       - schema-registry
     volumes:
+      # AVRO schemas
       - ./avro_schemas:/avro_schemas:ro
-      - django:/django
-      - django-static:/django-static
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_HOST=postgres
@@ -145,5 +157,4 @@ services:
 volumes:
   kafka-data:
   postgres-data:
-  django-static:
-  django:
+  web-static:
