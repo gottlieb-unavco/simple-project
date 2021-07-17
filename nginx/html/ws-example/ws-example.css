@@ -17,6 +17,9 @@ body {
 
 /* Socket status display */
 .status {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
     margin-left: 2rem;
     padding: .1rem .3rem;
     background: #ffc;

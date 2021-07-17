@@ -1,3 +1,19 @@
+/**
+ * Provide a simple interface on a reconnecting socket.
+ * 
+ * The caller provides an onmessage to be called on any
+ * incoming traffic.
+ * 
+ * Return an object with one function: 
+ * socket.send({
+ *  ...
+ * })
+ * returns a Promise to send the message when the socket
+ * is available
+ * 
+ * @param {function} onmessage 
+ * @returns 
+ */
 function getSocket(onmessage) {  
   var state = 'init';
   var localhost = "" + location.host;
@@ -67,11 +83,12 @@ function getSocket(onmessage) {
   }
 
   /**
-   * Send a message to the socket
+   * Promise to send a message to the socket
    * @param {object} message JSON data for the message
+   * @returns Promise that resolves when the message is sent
    */
   function send(message) {
-    awaitSocket().then(function(socket) {
+    return awaitSocket().then(function(socket) {
       socket.send(JSON.stringify(message));
     });
   }
@@ -114,25 +131,27 @@ function createItem(item) {
   );
 }
 
+// Copied from https://davidwalsh.name/javascript-debounce-function
+// Returns a function, that, as long as it continues to be invoked, will not
+// be triggered. The function will be called after it stops being called for
+// N milliseconds. If `immediate` is passed, trigger the function on the
+// leading edge, instead of the trailing.
+function debounce(func, wait, immediate) {
+  let timeout;
+  function fn(...args) {
+    const context = this;
+    function later() {
+      timeout = null;
+      if (!immediate) func.apply(context, args);
+    }
+    const callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) { func.apply(context, args); }
+  }
+  return fn;
+}
 
-var people = [
-  'Homer', 'Marge', 'Bart', 'Lisa', 'Maggie', 'Moe', 'Barney', 
-  'Carl', 'Lenny', 'Mr. Burns', 'Bumblebee Man', 'McBain',
-];
-var locations = [
-  '642 Evergreen Terrace', "Moe's Bar", 'Springfield Elementary',
-  'Springfield Nuclear Power Plant', 'Capital City',
-];
-function getRandomItem(list) {
-  return list[Math.floor(Math.random() * list.length)];
-}
-function makeMessageText() {
-  return (
-    "" + getRandomItem(people) +
-    " calling " + getRandomItem(people) +
-    " from " + getRandomItem(locations)
-  );
-}
 
 /**
  * UUID4 quick and dirty version
@@ -206,28 +225,76 @@ function makeDataId() {
    * Send a message on the socket
    * @param {object} message 
    */
-  function sendMessage(message) {
+  function sendToSocket(message) {
     ws.send(message);
     addStatusLine('out', message);
   }
 
-  var $test = $('<button type="button">').text('Send a test message');
-  $test.click(function() {
-    sendMessage({
+  function sendOneMessage() {
+    sendToSocket({
       action: 'send',
       value: makeDataId(),
     });
+  }
+
+  var sendTimer = 0;
+  function cancelMessages() {
+    if (sendTimer) {
+      clearInterval(sendTimer);
+      sendTimer = 0;
+    }
+  }
+  function sendMessages(count, rate) {
+    cancelMessages();
+    var remaining = count;
+    var wait = 1000 / rate;
+    sendTimer = setInterval(
+      function() {
+        sendOneMessage();
+        remaining--;
+        if (remaining <= 0) {
+          cancelMessages();
+        }
+      },
+      wait
+    );
+  }
+
+  var $send = $('<button type="button">').text('Send');
+  var $count = $('<input type="number" value="10">');
+  var $rate = $('<input type="number" value="10">');
+  var $stop = $('<input type="button">').text('Stop');
+  
+  $send.click(function() {
+    sendMessages($count.val(), $rate.val());
   });
+  $stop.click(cancelMessages);
+
+  // Refresh function is debounced
+  var debouncedRefresh = debounce(
+    function() {
+      sendToSocket({
+        action: 'list',
+      });
+    },
+    1000
+  );
+
   var $refresh = $('<button type="button">').text('Refresh list');
-  $refresh.click(function() {
-    sendMessage({
-      action: 'list',
-    });
-  });
+  $refresh.click(debouncedRefresh);
 
-  $form.append($test, $refresh);
+  $form.append(
+    $send, 
+    " ",
+    $count, 
+    " @ ",
+    $rate, 
+    "/s",
+    "<br/>",
+    $refresh,
+  );
 
-  sendMessage({
+  sendToSocket({
     action: 'list',
   });
 }
