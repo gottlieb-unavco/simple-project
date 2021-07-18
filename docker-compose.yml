@@ -89,6 +89,8 @@ services:
       - 8080:80
       # HTTPS
       - 8443:443
+      # Super simple nginx server
+      # - 8181:81
 
   # Postgres database
   postgres:
@@ -108,33 +110,56 @@ services:
     ports:
       - 6379:6379
 
-  # Example django site
+  # Prometheus metrics
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/config:/etc/prometheus
+      - prometheus:/prometheus
+    ports:
+      - "9091:9090"
+
+  # Grafana metrics front-end
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - grafana:/var/lib/grafana
+      - ./grafana/config:/etc/grafana
+    ports:
+      - "3001:3000"
+    environment:
+      GF_INSTALL_PLUGINS: "grafana-worldmap-panel"
+
+  # Example web interfaces (collection and distribution)
   django_web:
     # GitHub repository image
-    image: ghcr.io/adam-iris/es-django:main
+    # image: ghcr.io/adam-iris/es-django:main
     # Build from local version of the project
     build: es-django
     command: gunicorn -c ./gunicorn.conf.py
     volumes:
       # AVRO schemas
       - ./avro_schemas:/avro_schemas:ro
-      # Shared volume for static files
+      # The django image includes a static filepath
       - web-static:/django-static
     environment:
+      # Archive (postgres) config (for distribution)
       - POSTGRES_DB=postgres
       - POSTGRES_HOST=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      # Kafka config (for collection)
       - BOOTSTRAP_SERVERS=broker:29092
       - SCHEMA_REGISTRY_URL=http://schema-registry:8081
       - AVRO_SCHEMAS_ROOT=/avro_schemas
     ports:
-      - 9090:9090
+      - 8100:8000
+      - 9100:9000
 
-  # Django data archiver
+  # Example data archiver
   django_archiver:
     # GitHub repository image
-    image: ghcr.io/adam-iris/es-django:main
+    # image: ghcr.io/adam-iris/es-django:main
     # Build from local version of the project
     build: es-django
     command: python manage.py run_kafka_consumer
@@ -145,16 +170,21 @@ services:
       # AVRO schemas
       - ./avro_schemas:/avro_schemas:ro
     environment:
+      # Archive (postgres) config
       - POSTGRES_DB=postgres
       - POSTGRES_HOST=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      # Kafka config
       - BOOTSTRAP_SERVERS=broker:29092
       - SCHEMA_REGISTRY_URL=http://schema-registry:8081
       - AVRO_SCHEMAS_ROOT=/avro_schemas
 
     
+# Volumes are local by default, but could be backed by test/prod datasources
 volumes:
   kafka-data:
   postgres-data:
   web-static:
+  prometheus:
+  grafana:
