@@ -1,3 +1,2 @@
 .env
-django-static/
-es-django
+django*
