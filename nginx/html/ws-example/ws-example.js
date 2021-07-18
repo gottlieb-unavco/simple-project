@@ -14,7 +14,7 @@
  * @param {function} onmessage 
  * @returns 
  */
-function getSocket(onmessage) {  
+function getSocket(onmessage) {
   var state = 'init';
   var localhost = "" + location.host;
   var wsURL = 'ws://' + localhost + '/example/ws/';
@@ -36,20 +36,20 @@ function getSocket(onmessage) {
     console.log(wsURL);
     socketPromise = $.Deferred();
     var socket = new WebSocket(wsURL);
-    socket.onopen = function() {
+    socket.onopen = function () {
       socketPromise.resolve(socket);
       retries = 0;
     };
     socket.onmessage = onmessage;
-    socket.onerror = function() {
+    socket.onerror = function () {
       console.log("Error");
       if (socketPromise) {
         socketPromise.reject();
       }
     }
-    socket.onclose = function() {
+    socket.onclose = function () {
       console.log("Closing");
-      var wasError = (state == 'error');      
+      var wasError = (state == 'error');
       if (socketPromise) {
         socketPromise.reject();
         socketPromise = null;
@@ -70,12 +70,12 @@ function getSocket(onmessage) {
     }
     return socketPromise.then(
       // Got a socket, but it may be stale
-      function(socket) {
+      function (socket) {
         if (!socket || socket.socketPromiseState == socket.CLOSED) {
           console.log('Reloading socket');
           return createSocket();
         }
-        return socket;         
+        return socket;
       },
       // Error = socket is closed, try recreating
       createSocketPromise,
@@ -88,7 +88,7 @@ function getSocket(onmessage) {
    * @returns Promise that resolves when the message is sent
    */
   function send(message) {
-    return awaitSocket().then(function(socket) {
+    return awaitSocket().then(function (socket) {
       socket.send(JSON.stringify(message));
     });
   }
@@ -155,7 +155,7 @@ function debounce(func, wait, immediate) {
 
 
 var people = [
-  'Homer', 'Marge', 'Bart', 'Lisa', 'Maggie', 'Moe', 'Barney', 
+  'Homer', 'Marge', 'Bart', 'Lisa', 'Maggie', 'Moe', 'Barney',
   'Carl', 'Lenny', 'Mr. Burns', 'Bumblebee Man', 'McBain',
 ];
 var locations = [
@@ -164,12 +164,14 @@ var locations = [
 ];
 function getRandomItem(list) {
   return list[Math.floor(Math.random() * list.length)];
+}
 function makeMessageText() {
   return (
     "" + getRandomItem(people) +
     " texts " + getRandomItem(people) +
     " from " + getRandomItem(locations)
   );
+}
 
 /**
  * Attach the socket API on top of the page elements
@@ -178,7 +180,7 @@ function makeMessageText() {
  * @param {jQuery} $status container for the websocket status
  * @param {jQuery} $archive container for the archive data
  */
- function attachSocket($form, $status, $archive) {
+function attachSocket($form, $status, $archive) {
   var $socketStatus = $('<div class="socket-status" />');
   $status.append($socketStatus);
 
@@ -190,8 +192,8 @@ function makeMessageText() {
   function addStatusLine(desc, data) {
     var $statusLine = (
       $('<div class="status-line">')
-      .addClass(desc)
-      .text(JSON.stringify(data))
+        .addClass(desc)
+        .text(JSON.stringify(data))
     );
     $('.status-line', $socketStatus).slice(0, -9).remove();
     $socketStatus.append($statusLine);
@@ -251,7 +253,7 @@ function makeMessageText() {
     var remaining = count;
     var wait = 1000 / rate;
     sendTimer = setInterval(
-      function() {
+      function () {
         sendOneMessage();
         remaining--;
         if (remaining <= 0) {
@@ -266,15 +268,15 @@ function makeMessageText() {
   var $count = $('<input type="number" value="10">');
   var $rate = $('<input type="number" value="10">');
   var $stop = $('<input type="button">').text('Stop');
-  
-  $send.click(function() {
+
+  $send.click(function () {
     sendMessages($count.val(), $rate.val());
   });
   $stop.click(cancelMessages);
 
   // Refresh function is debounced
   var debouncedRefresh = debounce(
-    function() {
+    function () {
       sendToSocket({
         action: 'list',
       });
@@ -286,11 +288,11 @@ function makeMessageText() {
   $refresh.click(debouncedRefresh);
 
   $form.append(
-    $send, 
+    $send,
     " ",
-    $count, 
+    $count,
     " @ ",
-    $rate, 
+    $rate,
     "/s",
     "<br/>",
     $refresh,
