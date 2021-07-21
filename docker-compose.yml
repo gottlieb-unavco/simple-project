@@ -133,9 +133,9 @@ services:
   # Example web interfaces (collection and distribution)
   django_web:
     # GitHub repository image
-    # image: ghcr.io/adam-iris/es-django:main
-    # Build from local version of the project
-    build: django
+    image: ghcr.io/adam-iris/es-django:main
+    # Or link/submodule to a subdirectory
+    # build: django
     command: gunicorn -c ./gunicorn.conf.py
     volumes:
       # AVRO schemas
@@ -159,9 +159,9 @@ services:
   # Example data archiver
   django_archiver:
     # GitHub repository image
-    # image: ghcr.io/adam-iris/es-django:main
-    # Build from local version of the project
-    build: django
+    image: ghcr.io/adam-iris/es-django:main
+    # Or link/submodule to a subdirectory
+    # build: django
     command: python manage.py run_kafka_consumer
     depends_on:
       - broker
