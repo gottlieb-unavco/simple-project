@@ -60,7 +60,7 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker:29092'
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
-  # RESTful proxy for kafka
+  # # RESTful proxy for kafka
   # rest-proxy:
   #   image: confluentinc/cp-kafka-rest:6.1.1
   #   hostname: rest-proxy
@@ -75,7 +75,6 @@ services:
   #     KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
   #     KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
 
-  # REQUIRED for web
   # Web front-end
   nginx:
     image: nginx
@@ -110,38 +109,44 @@ services:
     ports:
       - 6379:6379
 
-  # Prometheus metrics
-  prometheus:
-    image: prom/prometheus
-    volumes:
-      - ./prometheus/config:/etc/prometheus
-      - prometheus:/prometheus
-    ports:
-      - "9091:9090"
+  # # Prometheus metrics
+  # prometheus:
+  #   image: prom/prometheus
+  #   volumes:
+  #     - ./prometheus/config:/etc/prometheus
+  #     - prometheus:/prometheus
+  #   ports:
+  #     - "9091:9090"
 
-  # Grafana metrics front-end
-  grafana:
-    image: grafana/grafana:latest
-    volumes:
-      - grafana:/var/lib/grafana
-      - ./grafana/config:/etc/grafana
-    ports:
-      - "3001:3000"
-    environment:
-      GF_INSTALL_PLUGINS: "grafana-worldmap-panel"
+  # # Grafana metrics front-end
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   volumes:
+  #     - grafana:/var/lib/grafana
+  #     - ./grafana/config:/etc/grafana
+  #   ports:
+  #     - "3001:3000"
+  #   environment:
+  #     GF_INSTALL_PLUGINS: "grafana-worldmap-panel"
+
+  ####
+  # Example data service containers
+  ####
 
   # Example web interfaces (collection and distribution)
-  django_web:
+  example-web:
     # GitHub repository image
-    image: ghcr.io/adam-iris/es-django:main
+    image: ghcr.io/earthscope/es-example-django:main
     # Or link/submodule to a subdirectory
-    # build: django
+    # build: es-example-django
     command: gunicorn -c ./gunicorn.conf.py
     volumes:
       # AVRO schemas
       - ./avro_schemas:/avro_schemas:ro
       # The django image includes a static filepath
-      - web-static:/django-static
+      - web-static:/web-static
+      # For local development, can link to sources
+      # - ./es-example-django:/es-example-django
     environment:
       # Archive (postgres) config (for distribution)
       - POSTGRES_DB=postgres
@@ -157,11 +162,11 @@ services:
       - 9100:9000
 
   # Example data archiver
-  django_archiver:
+  example-archiver:
     # GitHub repository image
-    image: ghcr.io/adam-iris/es-django:main
+    image: ghcr.io/earthscope/es-example-django:main
     # Or link/submodule to a subdirectory
-    # build: django
+    # build: es-example-django
     command: python manage.py run_kafka_consumer
     depends_on:
       - broker
@@ -169,6 +174,8 @@ services:
     volumes:
       # AVRO schemas
       - ./avro_schemas:/avro_schemas:ro
+      # For local development, can link to sources
+      # - ./es-example-django:/es-example-django
     environment:
       # Archive (postgres) config
       - POSTGRES_DB=postgres
