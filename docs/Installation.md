@@ -4,7 +4,6 @@ Run `docker compose up -d` to bootstrap everything:
 
 It should finish with a launch report:
 
-    Use 'docker scan' to run Snyk tests against images to find vulnerabilities and learn how to fix them
     [+] Running 10/10
     ⠿ Network es-simple-project_default              Created
     ⠿ Volume "es-simple-project_kafka-data"          Created
@@ -30,7 +29,11 @@ So for example if :8080 works but :9090 throws an error, then nginx is fine but 
 
 Especially when running the first time, there are many things that might need intervention.
 
-**django_archiver** startup error
-: It may fail with an error like "Subscribed topic not available: example: Broker: Unknown topic or partition"
-: You need to send a message (to get the type into the topic) then restart this part
-
+- **nginx 404**
+  - If you http://localhost:8200/example/ works but http://localhost:8080/example/ returns 404 errors, try restarting nginx
+- **example-archiver**
+  - It may fail with an error like "Subscribed topic not available: example: Broker: Unknown topic or partition"
+  - You need to send a message (to get the type into the topic) then restart this part
+- **broker**
+  - Sometimes fails saying that the broker id is bad
+  - Clear the `kafka-data` volume, or disconnect the broker from it
