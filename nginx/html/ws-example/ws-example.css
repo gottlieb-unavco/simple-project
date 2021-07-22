@@ -2,28 +2,43 @@ body {
     padding: 1em;
 }
 
+
 /* List of latest messages */
+
+.latest .example {
+    font-size: 0.85em;
+    background: #eee;
+    padding: 0 .5em;
+}
+
+.latest li > span + span {
+    margin-left: .5em;
+}
+
 .latest .value {
     font-weight: bold;
-    padding-right: 1rem;
 }
 .latest .created_date, .latest .timestamp {
     color: #999;
-    padding-right: 0.5rem;
 }
+.latest .data_id {
+    background-color: #999;
+    padding: .1em .3em;
+}
+
 .latest .delay {
     font-size: .9rem;
 }
 
+
 /* Socket status display */
 .status {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
+    float: right;
     margin-left: 2rem;
     padding: .1rem .3rem;
     background: #ffc;
     width: 30rem;
+    max-width: 50%;
     font-size: 0.8rem;
     line-height: 1.3;
     white-space: nowrap;    
@@ -59,3 +74,9 @@ body {
 .socket-status .status-line.out::before {
     content: 'out';
 }
+
+.form {
+    max-width: 40em;
+}
+
+  

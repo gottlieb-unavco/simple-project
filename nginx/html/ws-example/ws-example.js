@@ -121,12 +121,12 @@ function createItem(item) {
   var delay = timeDiff(item.timestamp, item.created_date);
   var $delay = $('<span class="delay">').text("" + delay + "ms");
   $delay.prop('title', (
-    "transmitted: " + item.timestamp + " " +
-    "received: " + item.created_date
+    "created: " + item.timestamp + " / " +
+    "archived: " + item.created_date
   ));
   return $('<li>').append(
     $('<span class="value">').text('' + item.value),
-    $('<span class="data_id">').text('' + item.data_id),
+    $('<span class="badge data_id">').text('' + item.data_id),
     $('<span class="timestamp">').text('' + item.timestamp),
     $delay,
   );
@@ -264,10 +264,19 @@ function attachSocket($form, $status, $archive) {
     );
   }
 
-  var $send = $('<button type="button">').text('Send');
-  var $count = $('<input type="number" value="10">');
-  var $rate = $('<input type="number" value="10">');
-  var $stop = $('<input type="button">').text('Stop');
+  // Group for the main widget
+  var $sendGroup = $('<div class="input-group">');
+  var $send = $('<button class="btn btn-outline-primary" type="button">').text('Send');
+  var $count = $('<input type="number" class="form-control" value="10">');
+  var $rate = $('<input type="number" class="form-control" value="10">');
+  $sendGroup.append(
+    $send,
+    $count,
+    '<span class="input-group-text">@</span>',
+    $rate,
+    '<span class="input-group-text">/s</span>',
+  );
+  var $stop = $('<button type="button" class="btn btn-outline-danger">').text('Stop');
 
   $send.click(function () {
     sendMessages($count.val(), $rate.val());
@@ -284,17 +293,11 @@ function attachSocket($form, $status, $archive) {
     1000
   );
 
-  var $refresh = $('<button type="button">').text('Refresh list');
+  var $refresh = $('<button type="button" class="btn btn-outline-secondary">').text('Refresh list');
   $refresh.click(debouncedRefresh);
 
   $form.append(
-    $send,
-    " ",
-    $count,
-    " @ ",
-    $rate,
-    "/s",
-    "<br/>",
+    $sendGroup,
     $refresh,
   );
 
