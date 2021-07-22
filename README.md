@@ -12,7 +12,7 @@ From the root of this project run:
 
 See [Installation](docs/Installation.md) for more.
 
-## Components
+## Services
 
 Ideally, every available service should be included here, but anything unrelated to a particular bit of work should usually be commented out for size and speed.
 
@@ -37,19 +37,19 @@ Ideally, every available service should be included here, but anything unrelated
 
 ## Volumes
 
-For the most part, you only need volumes when you want **persistent** data. In some cases, it will be easier to disconnect these.
+For the most part, you only need volumes when you want **persistent** or **shared** data.
 
 - **web-static**
   - Static web content produced by Django, surfaced by nginx
 - **kafka-data**
   - Data backend for the broker
-  - _Disable_ to avoid kafka errors
+  - _Disabled by default_ to avoid kafka errors
 - **postgres-data**
   - Storage for postgres
 - **prometheus**
   - Storage for prometheus
 - **grafana**
-  - Storage for grafana
+  - Storage for grafana (ie. user accounts, dashboards)
 
 ## /avro_schemas
 
