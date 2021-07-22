@@ -1,0 +1,3 @@
+[submodule "es-example-django"]
+	path = es-example-django
+	url = https://adam-iris@github.com/EarthScope/es-example-django.git

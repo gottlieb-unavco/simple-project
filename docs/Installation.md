@@ -19,9 +19,9 @@ It should finish with a launch report:
 If everything works, you should be able to get to the example webapp at http://localhost:8080/example/.
 
 If something goes wrong, you can also check:
-http://localhost:8080/ (the main nginx server)
-http://localhost:8888/ (a "safe" nginx server)
-http://localhost:9090/ (django server directly)
+- http://localhost:8080/ (the main nginx server)
+- http://localhost:8888/ (a "safe" nginx server)
+- http://localhost:9090/ (django server directly)
 
 So for example if :8080 works but :9090 throws an error, then nginx is fine but django is down.
 
