@@ -32,6 +32,8 @@ Ideally, every available service should be included here, but anything unrelated
   - metrics backend
 - **grafana**
   - metrics front end
+- **examples**
+  - some [example](docs/example/) functionality
 
 ## Volumes
 
