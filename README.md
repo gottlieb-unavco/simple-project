@@ -1,6 +1,6 @@
-# simple-project
+# es-simple-cluster
 
-A simple development-oriented project skeleton
+A multi-container cluster using docker-compose, including the basic services that are part of the EarthScope environment.
 
 See [docs](docs/) for general documentation.
 
@@ -12,25 +12,57 @@ From the root of this project run:
 
 See [Installation](docs/Installation.md) for more.
 
-## Base Framework Components
+## Components
 
-These attempt to provide a "standard" set of services matching the deployment environment. For the most part, all these components and configuration should be kept in sync.
+Ideally, every available service should be included here, but anything unrelated to a particular bit of work should usually be commented out for size and speed.
 
-### Kafka
+broker (core)
+: Kafka broker
 
-The critical components of kafka: `router`, `zookeeper`, and `schema-registry`.
+zookeeper (core)
+: Kafka zookeeper
 
-### Storage systems
+schema-registry (core)
+: Kafka schema registry
 
-Has `postgres` and `redis` but they aren't configured at all.
+nginx (core)
+: external web interface
 
-## Local Components
+postgres
+: postgres database
 
-These are more like example code implementing some common use cases.
+redis
+: redis key/value store
 
-### avro_schemas
+prometheus
+: metrics backend
 
-A shared area for AVRO schemas. Presumably the way these are shared will change over time, but this is a quick and simple way.
+grafana
+: metrics front end
+
+## Volumes
+
+For the most part, you only need volumes when you want **persistent** data. In some cases, it will be easier to disconnect these.
+
+web-static
+: Static web content produced by Django, surfaced by nginx
+
+kafka-data
+: Data backend for the broker
+  _Disable_ to avoid kafka errors
+
+postgres-data
+: Storage for postgres
+
+prometheus
+: Storage for prometheus
+
+grafana
+: Storage for grafana
+
+## /avro_schemas
+
+For now, AVRO schemas are shared through a file mount.
 
 This path typically gets passed to components like:
 
@@ -39,10 +71,3 @@ This path typically gets passed to components like:
     environment:
       - AVRO_SCHEMAS_ROOT=/avro_schemas
 
-### nginx
-
-This is the web front end, it should mainly be used as a proxy for other services.
-
-### example_django
-
-An example project implementing a basic data path -- collection, archiving, and distribution.
