@@ -2,35 +2,8 @@
 
 Run `docker compose up -d` to bootstrap everything:
 
-    % docker compose up -d
-    [+] Building 2.0s (14/18)
-    => [es-simple-project_django_archiver internal] load build definition from Dockerfile
-    => => transferring dockerfile: 32B
-    => [es-simple-project_django internal] load build definition from Dockerfile
-    => => transferring dockerfile: 32B
-    => [es-simple-project_django_archiver internal] load .dockerignore
-    => => transferring context: 2B
-    => [es-simple-project_django internal] load .dockerignore
-    => => transferring context: 2B
-    => [es-simple-project_django_archiver internal] load metadata for docker.io/library/python:3
-    => [es-simple-project_django internal] load build context
-    => => transferring context: 160.44kB
-    => [es-simple-project_django_archiver 1/6] FROM docker.io/library/python:3@sha256:5992fd05009aa023212dddab8d588615d8002f8d752e6fdda259e409c393b
-    => => resolve docker.io/library/python:3@sha256:5992fd05009aa023212dddab8d588615d8002f8d752e6fdda259e409c393b6ad
-    => [es-simple-project_django_archiver internal] load build context
-    => => transferring context: 160.44kB
-    => CACHED [es-simple-project_django 2/6] WORKDIR /django
-    => CACHED [es-simple-project_django 3/6] COPY requirements.txt .
-    => CACHED [es-simple-project_django 4/6] RUN pip install -r requirements.txt
-    => [es-simple-project_django 5/6] COPY . ./
-    => [es-simple-project_django 6/6] RUN python manage.py migrate
-    => [es-simple-project_django_archiver] exporting to image
-    => => exporting layers
-    => => writing image sha256:7e7b668559c9b971210db4e4d980c2795ff9c94a0a6372f20d8b01108a802cb5
-    => => naming to docker.io/library/es-simple-project_django
-    => => naming to docker.io/library/es-simple-project_django_archiver
+It should finish with a launch report:
 
-    Use 'docker scan' to run Snyk tests against images to find vulnerabilities and learn how to fix them
     [+] Running 10/10
     ⠿ Network es-simple-project_default              Created
     ⠿ Volume "es-simple-project_kafka-data"          Created
@@ -43,5 +16,24 @@ Run `docker compose up -d` to bootstrap everything:
     ⠿ Container es-simple-project_schema-registry_1  Started
     ⠿ Container es-simple-project_django_archiver_1  Started
 
-Check http://localhost:8888/example/
+If everything works, you should be able to get to the example webapp at http://localhost:8080/example/.
 
+If something goes wrong, you can also check:
+- http://localhost:8080/ (the main nginx server)
+- http://localhost:8888/ (a "safe" nginx server)
+- http://localhost:9090/ (django server directly)
+
+So for example if :8080 works but :9090 throws an error, then nginx is fine but django is down.
+
+## Known issues
+
+Especially when running the first time, there are many things that might need intervention.
+
+- **nginx 404**
+  - If you http://localhost:8200/example/ works but http://localhost:8080/example/ returns 404 errors, try restarting nginx
+- **example-archiver**
+  - It may fail with an error like "Subscribed topic not available: example: Broker: Unknown topic or partition"
+  - You need to send a message (to get the type into the topic) then restart this part
+- **broker**
+  - Sometimes fails saying that the broker id is bad
+  - Clear the `kafka-data` volume, or disconnect the broker from it

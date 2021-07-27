@@ -1,7 +1,9 @@
 ---
-version: '2'
+version: '3'
 services:
-  # Apache zookeeper provides services for Kafka
+
+  # REQUIRED for kafka
+  # Apache zookeeper does what now?
   zookeeper:
     image: confluentinc/cp-zookeeper:6.1.1
     hostname: zookeeper
@@ -11,6 +13,7 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
+  # REQUIRED for kafka
   # The kafka broker
   broker:
     image: confluentinc/cp-server:6.1.1
@@ -39,10 +42,12 @@ services:
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       CONFLUENT_METRICS_ENABLE: 'true'
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
-    volumes:
-      - kafka-data:/var/lib/kafka/data
+    # If disconnected from a volume, rebuilding will reset
+    # volumes:
+    #   - kafka-data:/var/lib/kafka/data
 
-  # Schema registry
+  # REQUIRED for kafka
+  # Registry for kafka message schemas
   schema-registry:
     image: confluentinc/cp-schema-registry:6.1.1
     hostname: schema-registry
@@ -55,7 +60,7 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker:29092'
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
-  # RESTful proxy for kafka
+  # # RESTful proxy for kafka
   # rest-proxy:
   #   image: confluentinc/cp-kafka-rest:6.1.1
   #   hostname: rest-proxy
@@ -74,12 +79,17 @@ services:
   nginx:
     image: nginx
     volumes:
+      # Define a base nginx path in our subdirectory
       - ./nginx:/etc/nginx
-      - ./django-static:/etc/nginx/html/static
+      # Django static files are in a docker volume
+      - web-static:/etc/nginx/html/static
     ports:
-      - 8888:80
+      # The main web interface
+      - 8080:80
+      # HTTPS
       - 8443:443
-      - 8080:8080
+      # Super simple nginx server
+      # - 8181:81
 
   # Postgres database
   postgres:
@@ -90,6 +100,8 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    ports:
+      - 8432:5432
 
   # Redis key/value store
   redis:
@@ -97,38 +109,89 @@ services:
     ports:
       - 6379:6379
 
-  # Django web applications
-  django:
-    build: django
-    command: gunicorn -c /django/gunicorn.conf.py
+  # # Prometheus metrics
+  # prometheus:
+  #   image: prom/prometheus
+  #   volumes:
+  #     - ./prometheus/config:/etc/prometheus
+  #     - prometheus:/prometheus
+  #   ports:
+  #     - "9091:9090"
+
+  # # Grafana metrics front-end
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   volumes:
+  #     - grafana:/var/lib/grafana
+  #     - ./grafana/config:/etc/grafana
+  #   ports:
+  #     - "3001:3000"
+  #   environment:
+  #     GF_INSTALL_PLUGINS: "grafana-worldmap-panel"
+
+  ####
+  # Example data service containers
+  ####
+
+  # Example web interfaces (collection and distribution)
+  example-web:
+    # GitHub repository image
+    image: ghcr.io/earthscope/es-example-django:main
+    # Or link/submodule to a subdirectory
+    # build: es-example-django
+    command: gunicorn -c ./gunicorn.conf.py
     volumes:
-      - ./django:/django
+      # AVRO schemas
       - ./avro_schemas:/avro_schemas:ro
-      - ./django-static:/django-static
+      # The django image includes a static filepath
+      - web-static:/web-static
+      # For local development, can link to sources
+      # - ./es-example-django:/es-example-django
     environment:
+      # Archive (postgres) config (for distribution)
+      - POSTGRES_DB=postgres
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      # Kafka config (for collection)
       - BOOTSTRAP_SERVERS=broker:29092
       - SCHEMA_REGISTRY_URL=http://schema-registry:8081
       - AVRO_SCHEMAS_ROOT=/avro_schemas
     ports:
-      - 9090:9090
+      - 8100:8000
+      - 9100:9000
 
-  # Django data archiver
-  django_archiver:
-    build: django
+  # Example data archiver
+  example-archiver:
+    # GitHub repository image
+    image: ghcr.io/earthscope/es-example-django:main
+    # Or link/submodule to a subdirectory
+    # build: es-example-django
     command: python manage.py run_kafka_consumer
     depends_on:
       - broker
       - schema-registry
     volumes:
-      - ./django:/django
+      # AVRO schemas
       - ./avro_schemas:/avro_schemas:ro
-      - ./django-static:/django-static
+      # For local development, can link to sources
+      # - ./es-example-django:/es-example-django
     environment:
+      # Archive (postgres) config
+      - POSTGRES_DB=postgres
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      # Kafka config
       - BOOTSTRAP_SERVERS=broker:29092
       - SCHEMA_REGISTRY_URL=http://schema-registry:8081
       - AVRO_SCHEMAS_ROOT=/avro_schemas
 
     
+# Volumes are local by default, but could be backed by test/prod datasources
 volumes:
   kafka-data:
   postgres-data:
+  web-static:
+  prometheus:
+  grafana:
