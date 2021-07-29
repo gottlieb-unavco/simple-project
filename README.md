@@ -14,7 +14,7 @@ See [Installation](docs/Installation.md) for more.
 
 ## Services
 
-Ideally, every available service should be included here, but anything unrelated to a particular bit of work should usually be commented out for size and speed.
+Ideally, every available service should be included in this project, but for any particular bit of development most of them should probably be commented out for size/performance.
 
 - **broker** (core)
   - Kafka broker
@@ -24,6 +24,8 @@ Ideally, every available service should be included here, but anything unrelated
   - Kafka schema registry
 - **nginx** (core)
   - external web interface
+- **vouch-proxy**
+  - provides [CILogon](https://cilogon.org/) authentication for the nginx server
 - **postgres**
   - postgres database
 - **redis**
