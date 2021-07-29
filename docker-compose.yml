@@ -91,6 +91,12 @@ services:
       # Super simple nginx server
       # - 8181:81
 
+  # Vouch-proxy (CILogon integration with nginx)
+  vouch-proxy:
+    image: voucher/vouch-proxy:latest
+    volumes:
+      - ./vouch-proxy:/config
+
   # Postgres database
   postgres:
     image: postgres
