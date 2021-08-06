@@ -115,25 +115,25 @@ services:
     ports:
       - 6379:6379
 
-  # # Prometheus metrics
-  # prometheus:
-  #   image: prom/prometheus
-  #   volumes:
-  #     - ./prometheus/config:/etc/prometheus
-  #     - prometheus:/prometheus
-  #   ports:
-  #     - "9091:9090"
+  # Prometheus metrics
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/config:/etc/prometheus
+      - prometheus:/prometheus
+    # ports:
+    #   - "9091:9090"
 
-  # # Grafana metrics front-end
-  # grafana:
-  #   image: grafana/grafana:latest
-  #   volumes:
-  #     - grafana:/var/lib/grafana
-  #     - ./grafana/config:/etc/grafana
-  #   ports:
-  #     - "3001:3000"
-  #   environment:
-  #     GF_INSTALL_PLUGINS: "grafana-worldmap-panel"
+  # Grafana metrics front-end
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - grafana:/var/lib/grafana
+      - ./grafana/config:/etc/grafana
+    ports:
+      - "3001:3000"
+    environment:
+      GF_INSTALL_PLUGINS: "grafana-worldmap-panel"
 
   ####
   # Example data service containers
