@@ -76,12 +76,12 @@ services:
   #     KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
 
   # Web front-end
-  nginx:
+  web:
     image: nginx
     volumes:
       # Define a base nginx path in our subdirectory
       - ./nginx:/etc/nginx
-      # Django static files are in a docker volume
+      # Map the static subpath to a volume
       - web-static:/etc/nginx/html/static
     ports:
       # The main web interface
@@ -90,22 +90,24 @@ services:
       - 8443:443
       # Super simple nginx server
       # - 8181:81
+    depends_on:
+      - django-web
 
   # Vouch-proxy (CILogon integration with nginx)
   vouch-proxy:
     image: voucher/vouch-proxy:latest
     volumes:
       - ./vouch-proxy:/config
+    # ports:
+    #   - 9090:9090
 
   # Postgres database
   postgres:
     image: postgres
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+    env_file:
+      - ./docker.env
     ports:
       - 8432:5432
 
@@ -140,39 +142,33 @@ services:
   ####
 
   # Example web interfaces (collection and distribution)
-  example-web:
+  django-web:
     # GitHub repository image
     image: ghcr.io/earthscope/es-example-django:main
     # Or link/submodule to a subdirectory
-    # build: es-example-django
+    # build: ../es-example-django
     command: gunicorn -c ./gunicorn.conf.py
     volumes:
       # AVRO schemas
       - ./avro_schemas:/avro_schemas:ro
-      # The django image includes a static filepath
+      # Static files area
       - web-static:/web-static
       # For local development, can link to sources
-      # - ./es-example-django:/es-example-django
+      # - ../es-example-django:/es-example-django
+    env_file:
+      - ./docker.env
     environment:
-      # Archive (postgres) config (for distribution)
-      - POSTGRES_DB=postgres
-      - POSTGRES_HOST=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      # Kafka config (for collection)
-      - BOOTSTRAP_SERVERS=broker:29092
-      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
-      - AVRO_SCHEMAS_ROOT=/avro_schemas
+      - DJANGO_PROMETHEUS=1
     ports:
       - 8100:8000
       - 9100:9000
 
   # Example data archiver
-  example-archiver:
+  django-archiver:
     # GitHub repository image
     image: ghcr.io/earthscope/es-example-django:main
     # Or link/submodule to a subdirectory
-    # build: es-example-django
+    # build: ../es-example-django
     command: python manage.py run_kafka_consumer
     depends_on:
       - broker
@@ -181,17 +177,9 @@ services:
       # AVRO schemas
       - ./avro_schemas:/avro_schemas:ro
       # For local development, can link to sources
-      # - ./es-example-django:/es-example-django
-    environment:
-      # Archive (postgres) config
-      - POSTGRES_DB=postgres
-      - POSTGRES_HOST=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      # Kafka config
-      - BOOTSTRAP_SERVERS=broker:29092
-      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
-      - AVRO_SCHEMAS_ROOT=/avro_schemas
+      # - ../es-example-django:/es-example-django
+    env_file:
+      - ./docker.env
 
   # Example TimescaleDB
   timescaledb:
