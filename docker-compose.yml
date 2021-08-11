@@ -2,6 +2,12 @@
 version: '3'
 services:
 
+  # For better performance (and fewer headaches) comment out any services you aren't using.
+  # For services that do run, also consider commenting out
+  # - persistent storage
+  # - external port mapping
+  # as these are frequent sources of contention and random errors.
+
   # REQUIRED for kafka
   # Apache zookeeper does what now?
   zookeeper:
@@ -107,43 +113,49 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     env_file:
+      # see https://docs.docker.com/compose/environment-variables/#the-env_file-configuration-option
       - ./docker.env
-    ports:
-      - 8432:5432
+    # ports:
+    #   - 8432:5432
 
   # Redis key/value store
   redis:
     image: redis
-    ports:
-      - 6379:6379
+    # ports:
+    #   - 6379:6379
+
+  # TimescaleDB
+  timescaledb:
+    image: timescale/timescaledb:latest-pg12
+    environment:
+        POSTGRES_PASSWORD: "password"
+    # ports:
+    #     - "9432:5432"
 
   # Prometheus metrics
   prometheus:
     image: prom/prometheus
     volumes:
-      - ./prometheus/config:/etc/prometheus
+      # Persistent data volume
       - prometheus:/prometheus
+      # Local config
+      - ./prometheus/config:/etc/prometheus
     # ports:
     #   - "9091:9090"
 
-  # Example TimescaleDB
-  timescaledb:
-    image: timescale/timescaledb:latest-pg12
-    environment:
-        POSTGRES_PASSWORD: "password"
-    ports:
-        - "9432:5432"
-
-  # Grafana metrics front-end
+  # Grafana front-end
   grafana:
     image: grafana/grafana:latest
     volumes:
+      # Persistent data volume
       - grafana:/var/lib/grafana
+      # Local config
       - ./grafana/config:/etc/grafana
     ports:
       - "3001:3000"
     environment:
       GF_INSTALL_PLUGINS: "grafana-worldmap-panel"
+
 
   ####
   # Example data service containers
@@ -164,7 +176,9 @@ services:
       # For local development, can link to sources
       # - ../es-example-django:/es-example-django
     env_file:
+      # see https://docs.docker.com/compose/environment-variables/#the-env_file-configuration-option
       - ./docker.env
+    # Local env on top of env_file
     environment:
       - DJANGO_PROMETHEUS=1
     ports:
@@ -187,27 +201,8 @@ services:
       # For local development, can link to sources
       # - ../es-example-django:/es-example-django
     env_file:
+      # see https://docs.docker.com/compose/environment-variables/#the-env_file-configuration-option
       - ./docker.env
-
-  # Example TimescaleDB
-  timescaledb:
-    image: timescale/timescaledb:latest-pg12
-    hostname: postgres
-    container_name: es-simple-cluster_timescaleDB
-    environment:
-        POSTGRES_PASSWORD: "password"
-    ports:
-        - "5432:5432"
-        
-  # Example Grafana connected to TimescaleDB
-  grafana:
-    image: grafana/grafana
-    hostname: grafana
-    container_name: es-simple-cluster_grafana
-    ports:
-      - "3002:3002"
-    links:
-      - "timescaledb"
 
 # Volumes are local by default, but could be backed by test/prod datasources
 volumes:
