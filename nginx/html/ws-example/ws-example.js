@@ -124,11 +124,34 @@ function createItem(item) {
     "created: " + item.timestamp + " / " +
     "archived: " + item.created_date
   ));
-  return $('<li>').append(
-    $('<span class="value">').text('' + item.value),
-    $('<span class="badge data_id">').text('' + item.data_id),
-    $('<span class="timestamp">').text('' + item.timestamp),
-    $delay,
+  return $('<li class="card latest popup-help">').append(
+    $('<div class="card-header">').append(
+      $('<span class="value">').text('' + item.value),
+      ' - ',
+      $('<span class="timestamp">').text('' + item.timestamp),
+      ' - ',
+      $delay,
+      $('<div class="popup card">').append(
+        $('<ul class="list-compact">').append(
+          [
+            ['Data Id', '' + item.data_id],
+            ['Started', '' + item.timestamp],
+            ['Received', '' + item.created_date],
+            ['Provenance', $('<ul>').append(
+              item.data_provenance.map(function(prov) {
+                return $('<li>').append('' + prov);
+              })
+            )],
+          ].map(function(row) {
+            return $('<li>').append(
+              $('<b>').append(row[0]),
+              ': ',
+              row[1]
+            );
+          })
+        )
+      )
+    )
   );
 }
 

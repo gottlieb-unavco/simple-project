@@ -2,6 +2,12 @@
 version: '3'
 services:
 
+  # For better performance (and fewer headaches) comment out any services you aren't using.
+  # For services that do run, also consider commenting out
+  # - persistent storage
+  # - external port mapping
+  # as these are frequent sources of contention and random errors.
+
   # REQUIRED for kafka
   # Apache zookeeper does what now?
   zookeeper:
@@ -27,7 +33,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://broker:9092
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
@@ -76,12 +82,12 @@ services:
   #     KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
 
   # Web front-end
-  nginx:
+  web:
     image: nginx
     volumes:
       # Define a base nginx path in our subdirectory
       - ./nginx:/etc/nginx
-      # Django static files are in a docker volume
+      # Map the static subpath to a volume
       - web-static:/etc/nginx/html/static
     ports:
       # The main web interface
@@ -90,89 +96,101 @@ services:
       - 8443:443
       # Super simple nginx server
       # - 8181:81
+    depends_on:
+      - django-web
 
   # Vouch-proxy (CILogon integration with nginx)
   vouch-proxy:
     image: voucher/vouch-proxy:latest
     volumes:
       - ./vouch-proxy:/config
+    # ports:
+    #   - 9090:9090
 
   # Postgres database
   postgres:
     image: postgres
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    ports:
-      - 8432:5432
+    env_file:
+      # see https://docs.docker.com/compose/environment-variables/#the-env_file-configuration-option
+      - ./docker.env
+    # ports:
+    #   - 8432:5432
 
   # Redis key/value store
   redis:
     image: redis
+    # ports:
+    #   - 6379:6379
+
+  # TimescaleDB
+  timescaledb:
+    image: timescale/timescaledb:latest-pg12
+    environment:
+        POSTGRES_PASSWORD: "password"
+    # ports:
+    #     - "9432:5432"
+
+  # Prometheus metrics
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      # Persistent data volume
+      - prometheus:/prometheus
+      # Local config
+      - ./prometheus/config:/etc/prometheus
+    # ports:
+    #   - "9091:9090"
+
+  # Grafana front-end
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      # Persistent data volume
+      - grafana:/var/lib/grafana
+      # Local config
+      - ./grafana/config:/etc/grafana
     ports:
-      - 6379:6379
+      - "3001:3000"
+    environment:
+      GF_INSTALL_PLUGINS: "grafana-worldmap-panel"
 
-  # # Prometheus metrics
-  # prometheus:
-  #   image: prom/prometheus
-  #   volumes:
-  #     - ./prometheus/config:/etc/prometheus
-  #     - prometheus:/prometheus
-  #   ports:
-  #     - "9091:9090"
-
-  # # Grafana metrics front-end
-  # grafana:
-  #   image: grafana/grafana:latest
-  #   volumes:
-  #     - grafana:/var/lib/grafana
-  #     - ./grafana/config:/etc/grafana
-  #   ports:
-  #     - "3001:3000"
-  #   environment:
-  #     GF_INSTALL_PLUGINS: "grafana-worldmap-panel"
 
   ####
   # Example data service containers
   ####
 
   # Example web interfaces (collection and distribution)
-  example-web:
+  django-web:
     # GitHub repository image
     image: ghcr.io/earthscope/es-example-django:main
     # Or link/submodule to a subdirectory
-    # build: es-example-django
+    # build: ../es-example-django
     command: gunicorn -c ./gunicorn.conf.py
     volumes:
       # AVRO schemas
       - ./avro_schemas:/avro_schemas:ro
-      # The django image includes a static filepath
+      # Static files area
       - web-static:/web-static
       # For local development, can link to sources
-      # - ./es-example-django:/es-example-django
+      # - ../es-example-django:/es-example-django
+    env_file:
+      # see https://docs.docker.com/compose/environment-variables/#the-env_file-configuration-option
+      - ./docker.env
+    # Local env on top of env_file
     environment:
-      # Archive (postgres) config (for distribution)
-      - POSTGRES_DB=postgres
-      - POSTGRES_HOST=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      # Kafka config (for collection)
-      - BOOTSTRAP_SERVERS=broker:29092
-      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
-      - AVRO_SCHEMAS_ROOT=/avro_schemas
+      - DJANGO_PROMETHEUS=1
     ports:
       - 8100:8000
       - 9100:9000
 
   # Example data archiver
-  example-archiver:
+  django-archiver:
     # GitHub repository image
     image: ghcr.io/earthscope/es-example-django:main
     # Or link/submodule to a subdirectory
-    # build: es-example-django
+    # build: ../es-example-django
     command: python manage.py run_kafka_consumer
     depends_on:
       - broker
@@ -181,19 +199,11 @@ services:
       # AVRO schemas
       - ./avro_schemas:/avro_schemas:ro
       # For local development, can link to sources
-      # - ./es-example-django:/es-example-django
-    environment:
-      # Archive (postgres) config
-      - POSTGRES_DB=postgres
-      - POSTGRES_HOST=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      # Kafka config
-      - BOOTSTRAP_SERVERS=broker:29092
-      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
-      - AVRO_SCHEMAS_ROOT=/avro_schemas
+      # - ../es-example-django:/es-example-django
+    env_file:
+      # see https://docs.docker.com/compose/environment-variables/#the-env_file-configuration-option
+      - ./docker.env
 
-    
 # Volumes are local by default, but could be backed by test/prod datasources
 volumes:
   kafka-data:
