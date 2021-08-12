@@ -193,7 +193,26 @@ services:
       - SCHEMA_REGISTRY_URL=http://schema-registry:8081
       - AVRO_SCHEMAS_ROOT=/avro_schemas
 
-    
+  # Example TimescaleDB
+  timescaledb:
+    image: timescale/timescaledb:latest-pg12
+    hostname: postgres
+    container_name: es-simple-cluster_timescaleDB
+    environment:
+        POSTGRES_PASSWORD: "password"
+    ports:
+        - "5432:5432"
+        
+  # Example Grafana connected to TimescaleDB
+  grafana:
+    image: grafana/grafana
+    hostname: grafana
+    container_name: es-simple-cluster_grafana
+    ports:
+      - "3002:3002"
+    links:
+      - "timescaledb"
+
 # Volumes are local by default, but could be backed by test/prod datasources
 volumes:
   kafka-data:
