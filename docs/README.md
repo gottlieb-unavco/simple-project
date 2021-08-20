@@ -36,7 +36,7 @@ and add to the `docker-compose.yml` like:
         my_feature:
             build: my_feature
 
-See the [Django](Django) subdirectory for an example.
+See the [Django](https://github.com/earthscope/es-example-django/) subdirectory for an example.
 
 ## Components
 

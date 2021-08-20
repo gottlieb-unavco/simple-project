@@ -1,11 +1,20 @@
 <!doctype html>
 <html>
   <body>
-    <p>
+    <h1>
       Nginx root page
+    </h1>
+    <p>
+      <!--# echo var="auth_user" default="unknown" -->
     </p>
     <p>
-      <a href="/example/">Kafka Example Page</a>
+      <a href="/example/">Django Kafka Example Page</a>
+    </p>
+    <p>
+      <a href="/ws-example/">WebSockets Example Page</a>
+    </p>
+    <p>
+      <a href="/secure/">Secure area (via CILogon)</a>
     </p>
   </body>
 </html>
